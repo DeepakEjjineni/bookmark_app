@@ -21,6 +21,7 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
 
   useEffect(() => {
+    console.log('🔵 Setting up Realtime subscription for user:', userId)
     const supabase = createClient()
 
     const channel = supabase
@@ -34,6 +35,7 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
+          console.log('🔴 REALTIME EVENT RECEIVED:', payload)
           if (payload.eventType === 'INSERT') {
             setBookmarks((prev) => [payload.new as Bookmark, ...prev])
           } else if (payload.eventType === 'DELETE') {
@@ -43,12 +45,20 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('🟢 Subscription status:', status)
+      })
       
     return () => {
+      console.log('🔴 Cleaning up Realtime subscription')
       supabase.removeChannel(channel)
     }
   }, [userId])
+
+  useEffect(()=>{
+    console.log('📦 Initial bookmarks updated:', initialBookmarks.length)
+    setBookmarks(initialBookmarks)
+  }, [initialBookmarks])
 
   if (bookmarks.length === 0) {
     return (
