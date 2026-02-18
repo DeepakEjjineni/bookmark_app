@@ -44,7 +44,7 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
           schema: 'public',
           table: 'bookmarks',
         },
-        (payload) => {
+        (payload: any) => {
           console.log('🔴 REALTIME EVENT RECEIVED:', payload)
           
           if (payload.new?.user_id === userId && payload.eventType === 'INSERT') {
