@@ -37,7 +37,6 @@ export default function AddBookmarkForm({ userId }: { userId: string }) {
     } else {
       setUrl('')
       setTitle('')
-      router.refresh()
     }
 
     setLoading(false)
