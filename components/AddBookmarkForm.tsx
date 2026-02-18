@@ -2,21 +2,23 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import { useRouter } from 'next/navigation'
 
-export default function AddBookmarkForm({ userId }: { userId: string }) {
+type Props = {
+  userId: string
+  onBookmarkAdded?: (bookmark: any) => void // callback to update parent state
+}
+
+export default function AddBookmarkForm({ userId, onBookmarkAdded }: Props) {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    // basic url check
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       setError('URL must start with http:// or https://')
       setLoading(false)
@@ -25,11 +27,17 @@ export default function AddBookmarkForm({ userId }: { userId: string }) {
 
     const supabase = createClient()
 
-    const { error: insertError } = await supabase.from('bookmarks').insert({
+    const newBookmark = {
       url: url.trim(),
       title: title.trim(),
       user_id: userId,
-    })
+    }
+
+    const { data, error: insertError } = await supabase
+      .from('bookmarks')
+      .insert(newBookmark)
+      .select()
+      .single()
 
     if (insertError) {
       setError('Something went wrong. Try again.')
@@ -37,6 +45,10 @@ export default function AddBookmarkForm({ userId }: { userId: string }) {
     } else {
       setUrl('')
       setTitle('')
+      // Call the callback to update parent state immediately
+      if (onBookmarkAdded && data) {
+        onBookmarkAdded(data)
+      }
     }
 
     setLoading(false)
