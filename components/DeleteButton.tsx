@@ -24,7 +24,6 @@ export default function DeleteButton({ bookmarkId }: { bookmarkId: string }) {
       console.error('Delete failed:', error)
       alert('Could not delete. Try again.')
     } else {
-      router.refresh()
     }
 
     setLoading(false)
