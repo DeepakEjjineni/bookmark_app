@@ -31,6 +31,11 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
     })
   }
 
+  function handleBookmarkDeleted(bookmarkId: string) {
+    console.log('➖ Locally deleting bookmark:', bookmarkId)
+    setBookmarks((prev) => prev.filter(b => b.id !== bookmarkId))
+  }
+
   useEffect(() => {
     console.log('🔵 Setting up Realtime subscription for user:', userId)
     const supabase = createClient()
@@ -139,7 +144,10 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
                 </div>
 
                 <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <DeleteButton bookmarkId={bookmark.id} />
+                  <DeleteButton 
+                    bookmarkId={bookmark.id} 
+                    onDeleted={() => handleBookmarkDeleted(bookmark.id)}
+                  />
                 </div>
               </li>
             )
