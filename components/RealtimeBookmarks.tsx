@@ -21,39 +21,50 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
 
   useEffect(() => {
-    console.log('🔵 Setting up Realtime subscription for user:', userId)
-    const supabase = createClient()
+  console.log('🔵 Setting up Realtime subscription for user:', userId)
+  const supabase = createClient()
 
-    const channel = supabase
-      .channel('bookmarks-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', 
-          schema: 'public',
-          table: 'bookmarks',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('🔴 REALTIME EVENT RECEIVED:', payload)
+  // Test WITHOUT filter first
+  const channel = supabase
+    .channel('bookmarks-realtime-test')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'bookmarks',
+        // REMOVED FILTER TEMPORARILY TO TEST
+      },
+      (payload) => {
+        console.log('🔴 REALTIME EVENT RECEIVED (NO FILTER):', payload)
+        console.log('Event user_id:', payload.new?.user_id)
+        console.log('My user_id:', userId)
+        
+        // Only update if it's for this user
+        if (payload.new?.user_id === userId) {
           if (payload.eventType === 'INSERT') {
+            console.log('➕ Adding new bookmark')
             setBookmarks((prev) => [payload.new as Bookmark, ...prev])
-          } else if (payload.eventType === 'DELETE') {
-            setBookmarks((prev) =>
-              prev.filter((b) => b.id !== payload.old.id)
-            )
           }
         }
-      )
-      .subscribe((status) => {
-        console.log('🟢 Subscription status:', status)
-      })
-      
-    return () => {
-      console.log('🔴 Cleaning up Realtime subscription')
-      supabase.removeChannel(channel)
-    }
-  }, [userId])
+        
+        if (payload.old?.user_id === userId) {
+          if (payload.eventType === 'DELETE') {
+            console.log('➖ Removing bookmark')
+            setBookmarks((prev) => prev.filter((b) => b.id !== payload.old.id))
+          }
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('🟢 Subscription status:', status)
+    })
+
+  return () => {
+    console.log('🔴 Cleaning up Realtime subscription')
+    supabase.removeChannel(channel)
+  }
+}, [userId])
 
   useEffect(()=>{
     console.log('📦 Initial bookmarks updated:', initialBookmarks.length)
