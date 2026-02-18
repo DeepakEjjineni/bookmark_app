@@ -122,11 +122,11 @@ export default function RealtimeBookmarks({ initialBookmarks, userId }: Props) {
                     alt=""
                     className="w-4 h-4 mt-1 rounded-sm flex-shrink-0"
                     onError={(e) => {
-                      ;(e.target as HTMLImageElement).style.display = 'none'
+                      (e.target as HTMLImageElement).style.display = 'none'
                     }}
                   />
                   <div className="min-w-0">
-                    
+                    <a
                       href={bookmark.url}
                       target="_blank"
                       rel="noopener noreferrer"
