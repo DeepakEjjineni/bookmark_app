@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import AddBookmarkForm from '@/components/AddBookmarkForm'
 import RealtimeBookmarks from '@/components/RealtimeBookmarks'
 import SignOutButton from '@/components/SignOutButton'
 
 export default async function HomePage() {
-  const supabase = await createClient() 
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -24,7 +23,6 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           {avatar && (
@@ -40,17 +38,7 @@ export default async function HomePage() {
         <SignOutButton />
       </header>
 
-      <div className="mb-6">
-        <AddBookmarkForm userId={user.id} />
-      </div>
-
-      <div>
-        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
-          Saved ({bookmarks?.length ?? 0})
-        </p>
-        <RealtimeBookmarks initialBookmarks={bookmarks ?? []} userId={user.id} />
-      </div>
-
+      <RealtimeBookmarks initialBookmarks={bookmarks ?? []} userId={user.id} />
     </div>
   )
 }
