@@ -1,12 +1,15 @@
 'use client'
 
-import { createClient } from '@/lib/supabase-browser'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase-browser'
 
-export default function DeleteButton({ bookmarkId }: { bookmarkId: string }) {
+type Props = {
+  bookmarkId: string
+  onDeleted?: () => void
+}
+
+export default function DeleteButton({ bookmarkId, onDeleted }: Props) {
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   async function handleDelete() {
     const confirmed = confirm('Delete this bookmark?')
@@ -24,6 +27,9 @@ export default function DeleteButton({ bookmarkId }: { bookmarkId: string }) {
       console.error('Delete failed:', error)
       alert('Could not delete. Try again.')
     } else {
+      if (onDeleted) {
+        onDeleted()
+      }
     }
 
     setLoading(false)
